@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DrawPad [Dev Version]</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- ÉCRAN D'ACCUEIL -->
+  <div id="homeScreen">
+    <h1 class="dev-title">DrawPad [Dev Version]</h1>
+    <p id="countdownDisplay">: Chargement...</p>
+
+    <div class="home-buttons">
+      <button id="startBtn" class="primary-btn"><i class="fa-solid fa-play"></i> Commencer à dessiner</button>
+      <button id="openGalleryBtn" class="secondary-btn"><i class="fa-solid fa-folder-open"></i> Mes dessins enregistrés</button>
+    </div>
+
+    <!-- PANNEAU DE TEST DE DATE -->
+    <div class="dev-date-panel">
+      <p class="dev-panel-title">Changer la date (Pour les Tests)</p>
+      <div class="dev-controls-grid">
+        <div class="control-group">
+          <label for="devMonth">Mois</label>
+          <select id="devMonth">
+            <option value="0">Janvier</option>
+            <option value="1">Février</option>
+            <option value="2">Mars</option>
+            <option value="3">Avril</option>
+            <option value="4">Mai</option>
+            <option value="5">Juin</option>
+            <option value="6">Juillet</option>
+            <option value="7">Août</option>
+            <option value="8" selected>Septembre</option>
+            <option value="9">Octobre</option>
+            <option value="10">Novembre</option>
+            <option value="11">Décembre</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label for="devYear">Année</label>
+          <input type="number" id="devYear" value="2026" min="2020" max="2035">
+        </div>
+
+        <div class="control-group">
+          <label for="devDay">Jour</label>
+          <input type="number" id="devDay" value="30" min="1" max="31">
+        </div>
+
+        <div class="control-group">
+          <label for="devHour">Heure</label>
+          <input type="number" id="devHour" value="18" min="0" max="23">
+        </div>
+
+        <div class="control-group">
+          <label for="devMinute">Minute</label>
+          <input type="number" id="devMinute" value="00" min="0" max="59">
+        </div>
+
+        <div class="control-group">
+          <label for="devSecond">Seconde</label>
+          <input type="number" id="devSecond" value="00" min="0" max="59">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INTERFACE DE DESSIN -->
+  <div id="appContainer">
+    <!-- BARRE D'OUTILS HAUTE -->
+    <div id="topBar">
+      <button id="backToHomeBtn" title="Retour à l'accueil"><i class="fa-solid fa-house"></i></button>
+      <button id="undoBtn" title="Annuler"><i class="fa-solid fa-rotate-left"></i></button>
+      <button id="redoBtn" title="Rétablir"><i class="fa-solid fa-rotate-right"></i></button>
+      <button id="resetZoomBtn" title="Réinitialiser le zoom"><i class="fa-solid fa-compress"></i></button>
+      
+      <div id="openPickerFromTop" class="color-indicator" title="Changer la couleur">
+        <div id="topColorDot"></div>
+      </div>
+
+      <button id="geminiAiBtn" title="Transformer photo en contour"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
+      <input type="file" id="geminiFileInput" accept="image/*" style="display: none;">
+
+      <button id="saveDrawingBtn" title="Enregistrer"><i class="fa-solid fa-floppy-disk"></i></button>
+      <button id="downloadBtn" title="Télécharger"><i class="fa-solid fa-download"></i></button>
+      <button id="clearCanvas" title="Effacer tout"><i class="fa-solid fa-trash"></i></button>
+    </div>
+
+    <!-- ZONE DU CANVAS -->
+    <div id="canvasContainer">
+      <canvas id="paintCanvas"></canvas>
+    </div>
+
+    <!-- BARRE D'OUTILS BASSE -->
+    <div id="bottomBar">
+      <button id="brushTool" class="tool-btn active" title="Pinceau"><i class="fa-solid fa-paint-brush"></i></button>
+      <button id="eraserTool" class="tool-btn" title="Gomme"><i class="fa-solid fa-eraser"></i></button>
+      <button id="bucketTool" class="tool-btn" title="Remplissage"><i class="fa-solid fa-fill-drip"></i></button>
+      <button id="eyedropperTool" class="tool-btn" title="Pipette"><i class="fa-solid fa-eye-dropper"></i></button>
+      <button id="textTool" class="tool-btn" title="Texte"><i class="fa-solid fa-font"></i></button>
+      <button id="handTool" class="tool-btn" title="Déplacer (Main)"><i class="fa-solid fa-hand"></i></button>
+      <button id="clearLayerBtn" class="tool-btn" title="Vider le calque"><i class="fa-solid fa-file"></i></button>
+    </div>
+
+    <!-- APERÇU MINIATURE -->
+    <div id="previewContainer">
+      <canvas id="previewCanvas"></canvas>
+    </div>
+  </div>
+
+  <!-- MODALE SÉLECTEUR DE COULEUR -->
+  <div id="colorPickerModal" class="modal">
+    <div class="modal-content color-picker-content">
+      <span id="closePickerBtn" class="close-btn">&times;</span>
+      <h3>Couleur & Épaisseur</h3>
+
+      <div class="picker-layout">
+        <div id="satValContainer">
+          <canvas id="satValCanvas"></canvas>
+          <div id="pickerCursor"></div>
+        </div>
+
+        <div id="hueContainer">
+          <div id="hueHandle"></div>
+        </div>
+
+        <div id="sizeSliderContainer">
+          <input type="range" id="pickerSizeInput" min="1" max="100" value="5" orient="vertical">
+          <div id="sizeHandle"></div>
+        </div>
+      </div>
+
+      <div class="preset-colors">
+        <button class="preset-btn" data-color="#000000" style="background:#000000;"></button>
+        <button class="preset-btn" data-color="#ffffff" style="background:#ffffff;"></button>
+        <button class="preset-btn" data-color="#ff0000" style="background:#ff0000;"></button>
+        <button class="preset-btn" data-color="#00ff00" style="background:#00ff00;"></button>
+        <button class="preset-btn" data-color="#0000ff" style="background:#0000ff;"></button>
+        <button class="preset-btn" data-color="#ffff00" style="background:#ffff00;"></button>
+        <button class="preset-btn" data-color="#ff00ff" style="background:#ff00ff;"></button>
+        <button class="preset-btn" data-color="#00ffff" style="background:#00ffff;"></button>
+      </div>
+
+      <div class="current-color-preview">
+        <span>Sélectionnée :</span>
+        <div id="currentColorDot"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALE GALERIE -->
+  <div id="galleryModal" class="modal">
+    <div class="modal-content">
+      <span id="closeGalleryBtn" class="close-btn">&times;</span>
+      <h2>Mes dessins enregistrés</h2>
+      <div id="galleryGrid"></div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
